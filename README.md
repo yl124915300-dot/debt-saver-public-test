@@ -2,6 +2,8 @@
 
 > Enter your wallet address to check whether your DeFi debt can be refinanced cheaper.
 
+**Public test:** https://debt-saver-public-test.pages.dev/
+
 Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It reads public indexed debt data, shows whether supported debt was found, and fails closed when a reviewed live comparison quote is unavailable.
 
 ## Safety boundary
@@ -48,14 +50,14 @@ Open http://127.0.0.1:4174.
 
 ## Cloudflare Pages deployment
 
-The zero-cost deployment target is Cloudflare Pages Functions plus D1:
+The public test is deployed at no cost on Cloudflare Pages Functions plus D1:
 
-1. Create a D1 database named debt-saver-public-test-analytics.
-2. Apply schema.sql.
-3. Replace the placeholder D1 database_id in wrangler.toml.
-4. Create a Pages project named debt-saver-public-test.
-5. Build with npm run build, output directory dist, and bind D1 as DB.
-6. Deploy, then verify /api/health, /api/funnel, live debt, no-debt, invalid-address, demo, preview, security headers, desktop, and mobile.
+- Pages project: `debt-saver-public-test`
+- D1 database: `debt-saver-public-test-analytics`
+- Production branch: `main`
+- Public URL: https://debt-saver-public-test.pages.dev/
+
+The launch deployment was verified against `/api/health`, `/api/funnel`, live debt, no-debt, invalid-address, demo, preview, security headers, desktop, and a 390×844 mobile viewport. Operator checks use the isolated `smoke` scope.
 
 Cloudflare Pages Functions keep the Morpho request server-side. No private RPC credential is required or exposed.
 
