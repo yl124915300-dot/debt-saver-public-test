@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "mode": "public-read-only",
+  "max_posts_per_run": 2,
+  "sources": [
+    { "kind": "web_search", "login": false, "reply_default": "unknown" },
+    { "kind": "public_forum", "login": false, "reply_default": "unknown" },
+    { "kind": "github_issues_discussions", "login": false, "reply_default": "unknown" }
+  ],
+  "forbidden": ["login", "captcha_bypass", "private_data", "wallet_deanonymization", "bulk_outreach"],
+  "reply_gate": {
+    "requires": ["explicit_public_reply_entry", "rules_allow_relevant_links", "high_relevance", "no_login_required"],
+    "on_unknown": "record_only"
+  },
+  "intents": [
+    { "id": "aave_high_borrow_rate", "terms": ["aave borrow rate", "aave high apy", "borrow rate spike"], "landing": "/aave-borrow-rate/" },
+    { "id": "morpho_aave_refinance", "terms": ["morpho vs aave", "migrate morpho debt", "refinance morpho"], "landing": "/morpho-vs-aave/" },
+    { "id": "compound_spark_refinance", "terms": ["compound refinance", "compound migrate", "spark refinance", "aave to spark"], "landing": "/morpho-vs-aave/" },
+    { "id": "liquidation_health_factor", "terms": ["liquidation risk", "health factor", "liquidation price"], "landing": "/defi-liquidation-risk/" },
+    { "id": "repay_migrate_debt", "terms": ["repay debt", "migrate debt", "move active loan", "debt swap"], "landing": "/defi-liquidation-risk/" }
+  ],
+  "record_fields": ["source_url", "observed_at", "published_at", "intent", "protocol", "urgency", "reply_allowed", "reply_reason", "matched_landing_page"]
+}

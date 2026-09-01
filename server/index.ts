@@ -126,6 +126,8 @@ const mime: Record<string, string> = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
 };
 
 async function staticFile(res: ServerResponse, path: string) {
@@ -134,7 +136,9 @@ async function staticFile(res: ServerResponse, path: string) {
   if (!candidate.startsWith(dist)) return json(res, 403, { error: 'Forbidden' });
   let file = candidate;
   try {
-    if (!(await stat(file)).isFile()) file = join(dist, 'index.html');
+    const info = await stat(file);
+    if (info.isDirectory()) file = join(file, 'index.html');
+    else if (!info.isFile()) file = join(dist, 'index.html');
   } catch {
     file = join(dist, 'index.html');
   }

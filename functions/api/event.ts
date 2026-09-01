@@ -9,6 +9,7 @@ export async function onRequestPost(context: PagesContext) {
       String(body.event) as PublicEvent,
       body.scope === 'demo' ? 'demo' : body.scope === 'smoke' ? 'smoke' : 'live',
       String(body.sessionId ?? ''),
+      String(body.source ?? 'direct'),
     );
     return json({ accepted: stored, mode: stored ? 'anonymous-aggregate' : 'analytics-unavailable' }, stored ? 202 : 503);
   } catch (error) {

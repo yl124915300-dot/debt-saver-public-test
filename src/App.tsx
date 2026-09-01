@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Metric } from './components/Metric';
-import { getPublicSessionId, recordPublicEvent } from './services/publicAnalytics';
+import { getPublicSessionId, getPublicSource, recordPublicEvent } from './services/publicAnalytics';
 import type { PublicScanResponse } from './services/publicTypes';
 
 const money = (value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
@@ -12,6 +12,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const smokeTest = new URLSearchParams(window.location.search).get('smoke') === '1';
+  const publicSource = getPublicSource();
 
   useEffect(() => { void recordPublicEvent('VISITOR', smokeTest ? 'smoke' : 'live'); }, [smokeTest]);
 
@@ -25,7 +26,7 @@ export function App() {
     const response = await fetch('/api/evaluate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ...payload, sessionId: getPublicSessionId(), analyticsScope: smokeTest ? 'smoke' : '' }),
+      body: JSON.stringify({ ...payload, sessionId: getPublicSessionId(), source: publicSource, analyticsScope: smokeTest ? 'smoke' : '' }),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error ?? 'Read-only scan failed closed.');
@@ -181,6 +182,13 @@ export function App() {
           <p>Ethereum Morpho Blue only. Data comes from Morpho's public indexed API and may lag the chain. Aave comparison is intentionally unavailable, so real-address scans do not produce QUOTE_READY. This is not financial advice.</p>
           <p>Report abuse or security issues through the <a href="https://github.com/yl124915300-dot/debt-saver-public-test/issues" target="_blank" rel="noreferrer">public issue tracker</a>. Do not include private keys, seed phrases, signatures, or personal information.</p>
         </section>
+
+        <nav className="intent-links" aria-label="Debt Saver intent guides">
+          <span>Read-only debt checks:</span>
+          <a href="/aave-borrow-rate/">Aave borrow rate</a>
+          <a href="/morpho-vs-aave/">Morpho vs Aave</a>
+          <a href="/defi-liquidation-risk/">Liquidation risk</a>
+        </nav>
       </main>
 
       <footer><span>Debt Saver · read-only public test</span><span>No mainnet writes · No calldata · No financial advice</span></footer>

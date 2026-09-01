@@ -63,15 +63,31 @@ export async function recordEvent(
   event: PublicEvent,
   scope: 'live' | 'demo' | 'smoke',
   sessionId: string,
+  source = 'direct',
 ) {
   if (!allowed.has(event)) throw new Error('Unsupported funnel event.');
   if (!/^[0-9a-f-]{16,64}$/i.test(sessionId)) throw new Error('Invalid anonymous session.');
   if (!env.DB) return false;
   const sessionHash = await hashSession(sessionId);
+  const normalizedSource = /^[a-z0-9_-]{1,64}$/.test(source) ? source : 'direct';
   const day = new Date().toISOString().slice(0, 10);
   await env.DB.prepare(
     'INSERT OR IGNORE INTO funnel_events (event, scope, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?)',
   ).bind(event, scope, day, sessionHash, new Date().toISOString()).run();
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS funnel_attribution (
+      event TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      source TEXT NOT NULL,
+      day TEXT NOT NULL,
+      session_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      UNIQUE(scope, event, source, session_hash)
+    )`,
+  ).run();
+  await env.DB.prepare(
+    'INSERT OR IGNORE INTO funnel_attribution (event, scope, source, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+  ).bind(event, scope, normalizedSource, day, sessionHash, new Date().toISOString()).run();
   return true;
 }
 

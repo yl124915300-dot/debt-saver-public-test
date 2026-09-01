@@ -13,12 +13,19 @@ export function getPublicSessionId() {
 
 export type AnalyticsScope = 'live' | 'demo' | 'smoke';
 
-export async function recordPublicEvent(event: PublicEvent, scope: AnalyticsScope = 'live') {
+const sourcePattern = /^[a-z0-9_-]{1,64}$/;
+
+export function getPublicSource() {
+  const value = new URLSearchParams(window.location.search).get('utm_source') ?? '';
+  return sourcePattern.test(value) ? value : 'direct';
+}
+
+export async function recordPublicEvent(event: PublicEvent, scope: AnalyticsScope = 'live', source = getPublicSource()) {
   try {
     await fetch('/api/event', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ event, scope, sessionId: getPublicSessionId() }),
+      body: JSON.stringify({ event, scope, source, sessionId: getPublicSessionId() }),
       keepalive: true,
     });
   } catch {

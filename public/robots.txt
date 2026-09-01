@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://debt-saver-public-test.pages.dev/sitemap.xml

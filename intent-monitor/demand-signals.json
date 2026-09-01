@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-09-01T00:00:00+08:00",
+  "collection_mode": "public_web_search_read_only",
+  "private_data_collected": false,
+  "wallets_collected": false,
+  "signals": [
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1uyxvo4/how_do_you_monitor_your_position_mostly_defi/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2026-07-17",
+      "intent": "liquidation_health_factor",
+      "protocol": ["Aave", "Morpho", "Compound"],
+      "urgency": "medium",
+      "reply_allowed": false,
+      "reply_reason": "Login required and current promotion/link rules could not be verified; record only.",
+      "matched_landing_page": "/defi-liquidation-risk/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1ubwsp5/how_do_you_actually_keep_track_of_your_defi/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2026-06-21",
+      "intent": "liquidation_health_factor",
+      "protocol": ["Aave", "Morpho"],
+      "urgency": "medium",
+      "reply_allowed": false,
+      "reply_reason": "Login required and promotion/link rules uncertain; record only.",
+      "matched_landing_page": "/defi-liquidation-risk/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/ethereum/comments/1srdz8j/daily_general_discussion_april_21_2026/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2026-04-21",
+      "intent": "compound_spark_refinance",
+      "protocol": ["Aave", "Spark"],
+      "urgency": "low",
+      "reply_allowed": false,
+      "reply_reason": "Archived demand signal; login required and thread-level promotion eligibility uncertain.",
+      "matched_landing_page": "/morpho-vs-aave/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1mctnv4/questions_for_defi_users_that_invest_with_moonwell_morpho_and_aave/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2025-07-30",
+      "intent": "morpho_aave_refinance",
+      "protocol": ["Morpho", "Aave"],
+      "urgency": "low",
+      "reply_allowed": false,
+      "reply_reason": "Older market-research thread; login and promotion eligibility uncertain.",
+      "matched_landing_page": "/morpho-vs-aave/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1mwg4hr/help_in_borrowing_usdc_from_aave/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2025-08-21",
+      "intent": "aave_high_borrow_rate",
+      "protocol": ["Aave", "Spark"],
+      "urgency": "medium",
+      "reply_allowed": false,
+      "reply_reason": "Older answered thread; login required and promotional linking is not clearly allowed.",
+      "matched_landing_page": "/aave-borrow-rate/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1ikkxbn/migrate_from_compound/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2025-02-08",
+      "intent": "repay_migrate_debt",
+      "protocol": ["Compound", "Aave"],
+      "urgency": "high",
+      "reply_allowed": false,
+      "reply_reason": "Older thread and unsupported Polygon scope; login required and no compliant current reply gate.",
+      "matched_landing_page": "/defi-liquidation-risk/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1ax0nmk/how_to_migrate_compound_v2_to_v3/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2024-02-22",
+      "intent": "compound_spark_refinance",
+      "protocol": ["Compound", "Aave"],
+      "urgency": "high",
+      "reply_allowed": false,
+      "reply_reason": "Older answered thread; no current high-relevance reply justification.",
+      "matched_landing_page": "/morpho-vs-aave/"
+    },
+    {
+      "source_url": "https://www.reddit.com/r/defi/comments/1altwgr/question_about_aave_borrowing_rate/",
+      "observed_at": "2026-09-01T00:00:00+08:00",
+      "published_at": "2024-02-08",
+      "intent": "aave_high_borrow_rate",
+      "protocol": ["Aave"],
+      "urgency": "medium",
+      "reply_allowed": false,
+      "reply_reason": "Older answered thread; no current high-relevance reply justification.",
+      "matched_landing_page": "/aave-borrow-rate/"
+    }
+  ]
+}

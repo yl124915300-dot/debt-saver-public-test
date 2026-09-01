@@ -11,16 +11,16 @@ export async function onRequestPost(context: PagesContext) {
     await enforceRateLimit(context.env, sessionId);
 
     if (body.demo === 'top1') {
-      await recordEvent(context.env, 'ADDRESS_SUBMITTED', scope, sessionId);
-      await recordEvent(context.env, 'DEBT_FOUND', scope, sessionId);
-      await recordEvent(context.env, 'QUOTE_READY', scope, sessionId);
+      await recordEvent(context.env, 'ADDRESS_SUBMITTED', scope, sessionId, String(body.source ?? 'direct'));
+      await recordEvent(context.env, 'DEBT_FOUND', scope, sessionId, String(body.source ?? 'direct'));
+      await recordEvent(context.env, 'QUOTE_READY', scope, sessionId, String(body.source ?? 'direct'));
       return json(reviewedTop1Demo());
     }
 
     if (typeof body.wallet !== 'string') return json({ error: 'wallet is required' }, 400);
-    await recordEvent(context.env, 'ADDRESS_SUBMITTED', scope, sessionId);
+    await recordEvent(context.env, 'ADDRESS_SUBMITTED', scope, sessionId, String(body.source ?? 'direct'));
     const positions = await scanMorphoDebt(body.wallet);
-    if (positions.length) await recordEvent(context.env, 'DEBT_FOUND', scope, sessionId);
+    if (positions.length) await recordEvent(context.env, 'DEBT_FOUND', scope, sessionId, String(body.source ?? 'direct'));
 
     const response: PublicScanResponse = positions.length ? {
       mode: 'live-read-only',

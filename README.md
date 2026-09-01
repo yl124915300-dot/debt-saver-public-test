@@ -4,6 +4,12 @@
 
 **Public test:** https://debt-saver-public-test.pages.dev/
 
+Intent entry points:
+
+- https://debt-saver-public-test.pages.dev/aave-borrow-rate/
+- https://debt-saver-public-test.pages.dev/morpho-vs-aave/
+- https://debt-saver-public-test.pages.dev/defi-liquidation-risk/
+
 Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It reads public indexed debt data, shows whether supported debt was found, and fails closed when a reviewed live comparison quote is unavailable.
 
 ## Safety boundary
@@ -32,7 +38,7 @@ Only these stage names may be recorded:
 
 VISITOR, ADDRESS_SUBMITTED, WALLET_CONNECTED, DEBT_FOUND, QUOTE_READY, QUOTE_VIEWED, REVIEW_REQUESTED
 
-The public build stores only event stage, live / demo / smoke scope, date, timestamp, and a SHA-256 hash of a random session ID. It does not store submitted wallet addresses, IP addresses, cookies, signatures, private keys, seed phrases, calldata, or personal profiles.
+The public build stores only event stage, live / demo / smoke scope, a fixed non-personal source label, date, timestamp, and a SHA-256 hash of a random session ID. It does not store submitted wallet addresses, IP addresses, cookies, signatures, private keys, seed phrases, calldata, usernames, or personal profiles.
 
 GET /api/funnel returns aggregate counts only. Production smoke tests use ?smoke=1 so they do not inflate real visitor data.
 

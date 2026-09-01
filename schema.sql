@@ -27,3 +27,13 @@ CREATE TABLE IF NOT EXISTS rate_windows (
   count INTEGER NOT NULL,
   PRIMARY KEY (session_hash, window_id)
 );
+
+CREATE TABLE IF NOT EXISTS funnel_attribution (
+  event TEXT NOT NULL,
+  scope TEXT NOT NULL,
+  source TEXT NOT NULL,
+  day TEXT NOT NULL,
+  session_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE(scope, event, source, session_hash)
+);
