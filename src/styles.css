@@ -95,6 +95,8 @@ main { max-width: 1060px; margin: 0 auto; padding: 0 28px 80px; }
 .notice--error { color: var(--red); border-color: rgba(255,127,121,.28); }
 .notice--success { max-width: none; color: var(--mint); border-color: rgba(84,231,162,.25); }
 .notice--warning { max-width: none; color: #ffd680; border-color: rgba(255,214,128,.28); }
+.source-list { display: grid; gap: 7px; margin-top: 18px; padding: 15px 16px; border: 1px solid var(--line); border-radius: 13px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+.source-list strong { color: var(--ink); font-size: 11px; }
 
 .live-result { padding: 26px 4px 8px; border-top: 1px solid var(--line); }
 .live-result h2 { margin: 16px 0 5px; font-size: 38px; letter-spacing: -.045em; }

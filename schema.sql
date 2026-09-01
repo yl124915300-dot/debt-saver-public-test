@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS funnel_events (
   event TEXT NOT NULL CHECK (event IN (
     'VISITOR',
     'ADDRESS_SUBMITTED',
-    'WALLET_CONNECTED',
     'DEBT_FOUND',
     'QUOTE_READY',
     'QUOTE_VIEWED',

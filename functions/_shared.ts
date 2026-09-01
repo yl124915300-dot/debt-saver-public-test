@@ -23,7 +23,6 @@ export interface PagesContext {
 const allowed = new Set<PublicEvent>([
   'VISITOR',
   'ADDRESS_SUBMITTED',
-  'WALLET_CONNECTED',
   'DEBT_FOUND',
   'QUOTE_READY',
   'QUOTE_VIEWED',

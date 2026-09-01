@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scanMorphoDebt } from '../src/services/liveScan.js';
+import { evaluateLiveWallet } from '../src/services/liveEvaluation.js';
 import { reviewedTop1Demo } from '../src/services/publicDemo.js';
 import { top1Quote } from '../src/services/seed.js';
 import type { PublicEvent, PublicScanResponse } from '../src/services/publicTypes.js';
@@ -50,7 +50,7 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string) {
       mainnetDeployment: false,
       gasSpend: false,
       analytics: 'local-memory-only',
-      quoteSource: 'unavailable-fail-closed',
+      quoteSource: 'live-aave-v3-ethereum-fixed-block',
     });
   }
   if (req.method === 'POST' && path === '/api/event') {
@@ -68,39 +68,16 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string) {
       return json(res, 200, reviewedTop1Demo());
     }
     if (typeof input.wallet !== 'string') return json(res, 400, { error: 'wallet is required' });
-    const positions = await scanMorphoDebt(input.wallet);
-    if (positions.length) record('DEBT_FOUND', 'live', input.sessionId);
-    const response: PublicScanResponse = positions.length ? {
-      mode: 'live-read-only',
-      status: 'DEBT_FOUND_NO_QUOTE',
-      scannedAt: new Date().toISOString(),
-      indexedBlock: null,
-      positions,
-      quote: null,
-      simulation: null,
-      explanation: 'Active Morpho Blue debt was found from the live public index.',
-      limitation: 'The reviewed public Aave comparison source is not configured. Debt Saver failed closed and did not create QUOTE_READY, savings claims, simulation, review calldata, or any transaction data.',
-      quoteReady: false,
-      broadcastable: false,
-    } : {
-      mode: 'live-read-only',
-      status: 'NO_DEBT_FOUND',
-      scannedAt: new Date().toISOString(),
-      indexedBlock: null,
-      positions: [],
-      quote: null,
-      simulation: null,
-      explanation: 'No active Ethereum Morpho Blue borrow position was returned by the public index. Other protocols and chains are outside this test.',
-      limitation: 'No supported debt means no quote.',
-      quoteReady: false,
-      broadcastable: false,
-    };
+    const response: PublicScanResponse = await evaluateLiveWallet(input.wallet);
+    if (response.positions.length) record('DEBT_FOUND', 'live', input.sessionId);
+    if (response.status === 'LIVE_QUOTE_READY') record('QUOTE_READY', 'live', input.sessionId);
     return json(res, 200, response);
   }
   if (req.method === 'POST' && path === '/api/review') {
     const input = await body(req);
-    if (input.quoteId !== top1Quote.id) return json(res, 400, { error: 'Only the reviewed snapshot has a preview.' });
-    record('REVIEW_REQUESTED', 'demo', input.sessionId);
+    const live = typeof input.quoteId === 'string' && /^live-[a-f0-9]{8}-\d+$/.test(input.quoteId);
+    if (input.quoteId !== top1Quote.id && !live) return json(res, 400, { error: 'Unknown or expired preflight reference.' });
+    record('REVIEW_REQUESTED', live ? 'live' : 'demo', input.sessionId);
     return json(res, 200, {
       mode: 'read-only-preview',
       broadcastable: false,

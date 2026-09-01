@@ -12,7 +12,7 @@ Intent entry points:
 
 Intent classification, channel rules, and reply gates are documented in `docs/INTENT_MONITOR.md`.
 
-Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It reads public indexed debt data, shows whether supported debt was found, and fails closed when a reviewed live comparison quote is unavailable.
+Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It compares a live Morpho Blue position with Aave V3 Ethereum and returns a five-minute, read-only preflight only when every source, feasibility, safety, and economics gate passes.
 
 ## Safety boundary
 
@@ -24,21 +24,23 @@ This public build is **READ-ONLY / TEST MODE**:
 - no mainnet contract deployment;
 - no gas spending;
 - no fee or revenue claims;
-- no live quote when the reviewed comparison source is unavailable.
+- no quote when any critical source, freshness, reserve, cap, liquidity, health-factor, or economics check fails.
 
 The Top 1 Morpho → Aave example is a clearly labeled, expired, reviewed fixed-block snapshot. It is a demo, not current pricing.
 
 ## Live behavior
 
-Public wallet address → server-side Morpho public API read → supported debt found / not found
+Public wallet address → Morpho official API position → Aave V3 Ethereum fixed-block contract reads → feasibility and economics gates → `LIVE_QUOTE_READY` or fail closed.
 
-If Morpho's public data source times out, rejects the query, or returns an error, the API returns a fail-closed error and creates no quote. Real-address scans currently stop at DEBT_FOUND; they do not emit QUOTE_READY because the public Aave comparison source is intentionally unavailable.
+Aave data comes from the Ethereum PoolAddressesProvider, ProtocolDataProvider, Oracle, Pool, token balance reads, and live gas price. The configured Pool and Oracle addresses are verified against the provider on every evaluation. Two public RPC heads are compared when both are available, then all contract values are read at one fixed block. Morpho data may be at most five minutes old; the Ethereum block at most three minutes old; the Morpho index may trail by at most 50 blocks.
+
+The 90-day economics include the current debt, Morpho borrow APY, Aave variable borrow APY, gross interest difference, verified Morpho free-flash liquidity (or Aave premium fallback), a conservative 1,200,000-gas model at live gas price, zero slippage only for same-asset routes, zero extra protocol fee, and a disclosed test service-fee policy of 10% of gross savings capped at $5,000. No fee is charged by this read-only site.
 
 ## Minimal anonymous funnel
 
 Only these stage names may be recorded:
 
-VISITOR, ADDRESS_SUBMITTED, WALLET_CONNECTED, DEBT_FOUND, QUOTE_READY, QUOTE_VIEWED, REVIEW_REQUESTED
+VISITOR, ADDRESS_SUBMITTED, DEBT_FOUND, QUOTE_READY, QUOTE_VIEWED, REVIEW_REQUESTED
 
 The public build stores only event stage, live / demo / smoke scope, a fixed non-personal source label, date, timestamp, and a SHA-256 hash of a random session ID. It does not store submitted wallet addresses, IP addresses, cookies, signatures, private keys, seed phrases, calldata, usernames, or personal profiles.
 
@@ -71,9 +73,9 @@ Cloudflare Pages Functions keep the Morpho request server-side. No private RPC c
 
 ## Scope and source
 
-- Live source: Morpho's public GraphQL API, Ethereum only.
-- Live protocol: Morpho Blue only.
-- Live target quote: unavailable / fail-closed.
+- Live source: Morpho official GraphQL API plus Aave V3 Ethereum on-chain contracts through public read-only RPC.
+- Live route: Morpho Blue → Aave V3 Ethereum only.
+- Live target quote: five-minute read-only preflight; fail-closed when a required check fails.
 - Demo: expired reviewed fixed-block snapshot at block 25,881,978.
 - Public issues: https://github.com/yl124915300-dot/debt-saver-public-test/issues
 

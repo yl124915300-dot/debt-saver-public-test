@@ -12,8 +12,7 @@ export function onRequestGet(context: PagesContext) {
     mainnetDeployment: false,
     gasSpend: false,
     analytics: context.env.DB ? 'anonymous-aggregate' : 'unavailable-fail-closed',
-    liveScope: ['Ethereum', 'Morpho Blue'],
-    quoteSource: 'unavailable-fail-closed',
+    liveScope: ['Ethereum', 'Morpho Blue', 'Aave V3'],
+    quoteSource: 'live-aave-v3-ethereum-fixed-block',
   });
 }
-
