@@ -10,6 +10,8 @@ Intent entry points:
 - https://debt-saver-public-test.pages.dev/morpho-vs-aave/
 - https://debt-saver-public-test.pages.dev/defi-liquidation-risk/
 
+Intent classification, channel rules, and reply gates are documented in `docs/INTENT_MONITOR.md`.
+
 Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It reads public indexed debt data, shows whether supported debt was found, and fails closed when a reviewed live comparison quote is unavailable.
 
 ## Safety boundary
