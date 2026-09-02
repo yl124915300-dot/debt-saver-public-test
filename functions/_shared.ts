@@ -64,18 +64,28 @@ async function hashSession(sessionId: string) {
   return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+function isD1QuotaError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /D1_ERROR/i.test(message) && /exceeded.*(?:daily|free tier).*limit|quota/i.test(message);
+}
+
 export async function enforceRateLimit(env: Env, sessionId: string) {
   if (!/^[0-9a-f-]{16,64}$/i.test(sessionId)) throw new Error('Invalid anonymous session.');
   if (!env.DB) throw new Error('Anonymous analytics and rate limiting are not configured.');
   const sessionHash = await hashSession(sessionId);
   const window = Math.floor(Date.now() / 600_000);
-  await env.DB.prepare(
-    'INSERT INTO rate_windows (session_hash, window_id, count) VALUES (?, ?, 1) ON CONFLICT(session_hash, window_id) DO UPDATE SET count = count + 1',
-  ).bind(sessionHash, window).run();
-  const result = await env.DB.prepare(
-    'SELECT count FROM rate_windows WHERE session_hash = ? AND window_id = ?',
-  ).bind(sessionHash, window).all<{ count: number }>();
-  if (Number(result.results?.[0]?.count ?? 0) > 12) throw new Error('Read-only scan rate limit reached. Try again later.');
+  try {
+    await env.DB.prepare(
+      'INSERT INTO rate_windows (session_hash, window_id, count) VALUES (?, ?, 1) ON CONFLICT(session_hash, window_id) DO UPDATE SET count = count + 1',
+    ).bind(sessionHash, window).run();
+    const result = await env.DB.prepare(
+      'SELECT count FROM rate_windows WHERE session_hash = ? AND window_id = ?',
+    ).bind(sessionHash, window).all<{ count: number }>();
+    if (Number(result.results?.[0]?.count ?? 0) > 12) throw new Error('Read-only scan rate limit reached. Try again later.');
+  } catch (error) {
+    if (isD1QuotaError(error)) return;
+    throw error;
+  }
 }
 
 export async function recordEvent(
@@ -91,37 +101,41 @@ export async function recordEvent(
   const sessionHash = await hashSession(sessionId);
   const attribution = normalizeAttribution(attributionInput);
   const day = new Date().toISOString().slice(0, 10);
-  await env.DB.prepare(
-    'INSERT OR IGNORE INTO funnel_events (event, scope, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?)',
-  ).bind(event, scope, day, sessionHash, new Date().toISOString()).run();
-  await env.DB.prepare(
-    `CREATE TABLE IF NOT EXISTS funnel_attribution (
-      event TEXT NOT NULL,
-      scope TEXT NOT NULL,
-      source TEXT NOT NULL,
-      landing_intent TEXT NOT NULL DEFAULT 'main',
-      medium TEXT NOT NULL DEFAULT 'none',
-      campaign TEXT NOT NULL DEFAULT 'none',
-      day TEXT NOT NULL,
-      session_hash TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      UNIQUE(scope, event, session_hash)
-    )`,
-  ).run();
-  await env.DB.prepare(
-    `INSERT INTO funnel_attribution
-      (event, scope, source, landing_intent, medium, campaign, day, session_hash, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(scope, event, session_hash) DO UPDATE SET
-        source = excluded.source,
-        landing_intent = excluded.landing_intent,
-        medium = excluded.medium,
-        campaign = excluded.campaign`,
-  ).bind(
-    event, scope, attribution.utm_source, attribution.landing_intent, attribution.utm_medium,
-    attribution.utm_campaign, day, sessionHash, new Date().toISOString(),
-  ).run();
-  return true;
+  try {
+    await env.DB.prepare(
+      'INSERT OR IGNORE INTO funnel_events (event, scope, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?)',
+    ).bind(event, scope, day, sessionHash, new Date().toISOString()).run();
+    await env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS funnel_attribution (
+        event TEXT NOT NULL,
+        scope TEXT NOT NULL,
+        source TEXT NOT NULL,
+        landing_intent TEXT NOT NULL DEFAULT 'main',
+        medium TEXT NOT NULL DEFAULT 'none',
+        campaign TEXT NOT NULL DEFAULT 'none',
+        day TEXT NOT NULL,
+        session_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(scope, event, session_hash)
+      )`,
+    ).run();
+    await env.DB.prepare(
+      `INSERT INTO funnel_attribution
+        (event, scope, source, landing_intent, medium, campaign, day, session_hash, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(scope, event, session_hash) DO UPDATE SET
+          source = excluded.source,
+          landing_intent = excluded.landing_intent,
+          medium = excluded.medium,
+          campaign = excluded.campaign`,
+    ).bind(
+      event, scope, attribution.utm_source, attribution.landing_intent, attribution.utm_medium,
+      attribution.utm_campaign, day, sessionHash, new Date().toISOString(),
+    ).run();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function json(body: unknown, status = 200) {
