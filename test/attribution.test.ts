@@ -34,6 +34,21 @@ describe('privacy-friendly campaign attribution', () => {
     });
   });
 
+  it('retains only the allowlisted organic search campaign', () => {
+    expect(parsePublicAttribution('?landing_intent=intent_aave_borrow_rate&utm_source=search&utm_medium=organic&utm_campaign=organic_search_v1')).toEqual({
+      landing_intent: 'intent_aave_borrow_rate',
+      utm_source: 'search',
+      utm_medium: 'organic',
+      utm_campaign: 'organic_search_v1',
+    });
+    expect(parsePublicAttribution('?utm_source=search&utm_medium=organic&utm_campaign=organic_search_v2')).toEqual({
+      landing_intent: 'main',
+      utm_source: 'search',
+      utm_medium: 'organic',
+      utm_campaign: 'none',
+    });
+  });
+
   it('uses non-identifying defaults without UTM parameters', () => {
     expect(parsePublicAttribution('')).toEqual({
       landing_intent: 'main', utm_source: 'direct', utm_medium: 'none', utm_campaign: 'none',
