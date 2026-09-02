@@ -10,7 +10,7 @@ export type PublicEvent =
 export const landingIntents = ['main', 'intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk'] as const;
 export const attributionSources = ['direct', 'x', 'search', 'intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk', 'operator_live_quote'] as const;
 export const attributionMediums = ['none', 'organic', 'landing'] as const;
-export const attributionCampaigns = ['none', 'realtime_rate_snapshot', 'intent_monitor', 'savings_outcome_v1', 'organic_search_v1'] as const;
+export const attributionCampaigns = ['none', 'realtime_rate_snapshot', 'intent_monitor', 'savings_outcome_v1', 'organic_search_v1', 'rate_opportunity_v1'] as const;
 
 export interface PublicAttribution {
   landing_intent: typeof landingIntents[number];

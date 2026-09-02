@@ -34,6 +34,29 @@ describe('privacy-friendly campaign attribution', () => {
     });
   });
 
+  it('retains the independent rate opportunity campaign without broadening campaign input', () => {
+    expect(parsePublicAttribution('?landing_intent=intent_aave_borrow_rate&utm_source=x&utm_medium=organic&utm_campaign=rate_opportunity_v1')).toEqual({
+      landing_intent: 'intent_aave_borrow_rate',
+      utm_source: 'x',
+      utm_medium: 'organic',
+      utm_campaign: 'rate_opportunity_v1',
+    });
+    expect(normalizeAttribution({
+      landing_intent: 'intent_aave_borrow_rate', utm_source: 'x', utm_medium: 'organic', utm_campaign: 'rate_opportunity_v1',
+    })).toEqual({
+      landing_intent: 'intent_aave_borrow_rate',
+      utm_source: 'x',
+      utm_medium: 'organic',
+      utm_campaign: 'rate_opportunity_v1',
+    });
+    expect(parsePublicAttribution('?utm_source=x&utm_medium=organic&utm_campaign=rate_opportunity_v2')).toEqual({
+      landing_intent: 'main',
+      utm_source: 'x',
+      utm_medium: 'organic',
+      utm_campaign: 'none',
+    });
+  });
+
   it('retains only the allowlisted organic search campaign', () => {
     expect(parsePublicAttribution('?landing_intent=intent_aave_borrow_rate&utm_source=search&utm_medium=organic&utm_campaign=organic_search_v1')).toEqual({
       landing_intent: 'intent_aave_borrow_rate',
