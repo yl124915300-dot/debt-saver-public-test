@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeAttribution, recordEvent, type D1Database, type D1PreparedStatement } from '../functions/_shared.js';
+import { enforceRateLimit, normalizeAttribution, recordEvent, type D1Database, type D1PreparedStatement } from '../functions/_shared.js';
 import { onRequestGet as getFunnel } from '../functions/api/funnel.js';
 import { parsePublicAttribution } from '../src/services/publicAnalytics.js';
 
@@ -21,6 +21,16 @@ class CapturingDatabase implements D1Database {
   funnelRows: Record<string, unknown>[] = [];
   attributionRows: Record<string, unknown>[] = [];
   prepare(query: string) { return new CapturingStatement(this, query); }
+}
+
+class FailingStatement implements D1PreparedStatement {
+  bind(..._values: unknown[]) { return this; }
+  async run() { throw new Error('D1_ERROR: account exceeded D1 free tier daily row read limit'); }
+  async all<T>(): Promise<{ results?: T[] }> { throw new Error('D1_ERROR: account exceeded D1 free tier daily row read limit'); }
+}
+
+class FailingDatabase implements D1Database {
+  prepare(_query: string) { return new FailingStatement(); }
 }
 
 describe('privacy-friendly campaign attribution', () => {
@@ -113,6 +123,12 @@ describe('privacy-friendly campaign attribution', () => {
     expect(stored).not.toContain('example.com');
     expect(stored).not.toContain('free text');
     expect(stored).toContain('realtime_rate_snapshot');
+  });
+
+  it('does not let unavailable analytics block the read-only product', async () => {
+    const sessionId = '12345678-1234-1234-1234-123456789abc';
+    await expect(enforceRateLimit({ DB: new FailingDatabase() }, sessionId)).resolves.toBeUndefined();
+    await expect(recordEvent({ DB: new FailingDatabase() }, 'ADDRESS_SUBMITTED', 'smoke', sessionId)).resolves.toBe(false);
   });
 
   it('aggregates legacy defaults and new source/campaign rows without mixing smoke into live', async () => {
