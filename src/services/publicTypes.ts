@@ -1,10 +1,23 @@
 export type PublicEvent =
+  | 'LANDING_VISIT'
   | 'VISITOR'
   | 'ADDRESS_SUBMITTED'
   | 'DEBT_FOUND'
   | 'QUOTE_READY'
   | 'QUOTE_VIEWED'
   | 'REVIEW_REQUESTED';
+
+export const landingIntents = ['main', 'intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk'] as const;
+export const attributionSources = ['direct', 'x', 'intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk', 'operator_live_quote'] as const;
+export const attributionMediums = ['none', 'organic', 'landing'] as const;
+export const attributionCampaigns = ['none', 'realtime_rate_snapshot', 'intent_monitor'] as const;
+
+export interface PublicAttribution {
+  landing_intent: typeof landingIntents[number];
+  utm_source: typeof attributionSources[number];
+  utm_medium: typeof attributionMediums[number];
+  utm_campaign: typeof attributionCampaigns[number];
+}
 
 export interface DataProof {
   source: string;

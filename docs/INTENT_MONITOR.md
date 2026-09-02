@@ -20,4 +20,4 @@ The initial read-only sample is in `intent-monitor/demand-signals.json`. It cont
 - `liquidation_health_factor` → `/defi-liquidation-risk/` → `utm_source=intent_liquidation_risk`
 - `repay_migrate_debt` → `/defi-liquidation-risk/` → `utm_source=intent_liquidation_risk`
 
-Landing visits and address submissions store only stage, scope, fixed source label, day, timestamp, and a hash of a random browser-session ID. They do not store the submitted address, IP address, cookie, or personal profile.
+Landing visits and later stages retain only allowlisted landing-intent, source, medium, and campaign labels plus stage, scope, day, timestamp, and a hash of a random browser-session ID. They do not store the submitted address, IP address, cookie, referrer URL, arbitrary free text, or personal profile.

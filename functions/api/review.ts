@@ -6,7 +6,7 @@ export async function onRequestPost(context: PagesContext) {
     const body = await parseBody(context.request);
     const live = typeof body.quoteId === 'string' && /^live-[a-f0-9]{8}-\d+$/.test(body.quoteId);
     if (body.quoteId !== top1Quote.id && !live) return json({ error: 'Unknown or expired preflight reference.' }, 400);
-    await recordEvent(context.env, 'REVIEW_REQUESTED', body.analyticsScope === 'smoke' ? 'smoke' : live ? 'live' : 'demo', String(body.sessionId ?? ''));
+    await recordEvent(context.env, 'REVIEW_REQUESTED', body.analyticsScope === 'smoke' ? 'smoke' : live ? 'live' : 'demo', String(body.sessionId ?? ''), body);
     return json({
       mode: 'read-only-preview',
       broadcastable: false,

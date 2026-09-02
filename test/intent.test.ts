@@ -8,13 +8,15 @@ const pages = [
 ] as const;
 
 describe('intent landing pages', () => {
-  for (const [slug, source] of pages) {
+  for (const [slug, landingIntent] of pages) {
     it(`${slug} is indexable, bounded, and attributed`, async () => {
       const html = await readFile(new URL(`../public/${slug}/index.html`, import.meta.url), 'utf8');
       expect(html).toMatch(new RegExp(`<title>[^<]+`));
       expect(html).toContain('name="description"');
       expect(html).toContain(`rel="canonical" href="https://debt-saver-public-test.pages.dev/${slug}/"`);
-      expect(html).toContain(`utm_source=${source}`);
+      expect(html).toContain(`data-landing-intent="${landingIntent}"`);
+      expect(html).toContain(`landing_intent=${landingIntent}`);
+      expect(html).not.toContain('data-source=');
       expect(html).toMatch(/READ-ONLY/i);
       expect(html).toMatch(/NO WALLET CONNECTION/i);
       expect(html).toMatch(/NO SIGNING/i);
@@ -22,6 +24,14 @@ describe('intent landing pages', () => {
       expect(html).toMatch(/NO GAS/i);
     });
   }
+
+  it('uses only allowlisted attribution fields and keeps smoke traffic isolated', async () => {
+    const script = await readFile(new URL('../public/intent-attribution.js', import.meta.url), 'utf8');
+    expect(script).toContain("event: 'LANDING_VISIT'");
+    expect(script).toContain("scope: smoke ? 'smoke' : 'live'");
+    for (const field of ['landing_intent', 'utm_source', 'utm_medium', 'utm_campaign']) expect(script).toContain(field);
+    expect(script).not.toMatch(/document\.cookie|referrer|wallet|location\.href\s*[,}]/);
+  });
 
   it('publishes robots and sitemap discovery', async () => {
     const robots = await readFile(new URL('../public/robots.txt', import.meta.url), 'utf8');

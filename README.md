@@ -40,9 +40,9 @@ The 90-day economics include the current debt, Morpho borrow APY, Aave variable 
 
 Only these stage names may be recorded:
 
-VISITOR, ADDRESS_SUBMITTED, DEBT_FOUND, QUOTE_READY, QUOTE_VIEWED, REVIEW_REQUESTED
+LANDING_VISIT, VISITOR, ADDRESS_SUBMITTED, DEBT_FOUND, QUOTE_READY, QUOTE_VIEWED, REVIEW_REQUESTED
 
-The public build stores only event stage, live / demo / smoke scope, a fixed non-personal source label, date, timestamp, and a SHA-256 hash of a random session ID. It does not store submitted wallet addresses, IP addresses, cookies, signatures, private keys, seed phrases, calldata, usernames, or personal profiles.
+The public build stores only event stage, live / demo / smoke scope, allowlisted landing-intent / source / medium / campaign labels, date, timestamp, and a SHA-256 hash of a random session ID. It does not store submitted wallet addresses, IP addresses, cookies, referrer URLs, arbitrary free text, signatures, private keys, seed phrases, calldata, usernames, or personal profiles.
 
 GET /api/funnel returns aggregate counts only. Production smoke tests use ?smoke=1 so they do not inflate real visitor data.
 

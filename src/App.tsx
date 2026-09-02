@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Metric } from './components/Metric';
-import { getPublicSessionId, getPublicSource, recordPublicEvent } from './services/publicAnalytics';
+import { getPublicAttribution, getPublicSessionId, recordPublicEvent } from './services/publicAnalytics';
 import type { PublicScanResponse } from './services/publicTypes';
 import type { LiveRefinanceQuote } from './services/publicTypes';
 import type { RefinanceQuote } from './services/types';
@@ -14,7 +14,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const smokeTest = new URLSearchParams(window.location.search).get('smoke') === '1';
-  const publicSource = getPublicSource();
+  const publicAttribution = getPublicAttribution();
 
   useEffect(() => { void recordPublicEvent('VISITOR', smokeTest ? 'smoke' : 'live'); }, [smokeTest]);
 
@@ -28,7 +28,7 @@ export function App() {
     const response = await fetch('/api/evaluate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ...payload, sessionId: getPublicSessionId(), source: publicSource, analyticsScope: smokeTest ? 'smoke' : '' }),
+      body: JSON.stringify({ ...payload, sessionId: getPublicSessionId(), ...publicAttribution, analyticsScope: smokeTest ? 'smoke' : '' }),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error ?? 'Read-only scan failed closed.');
@@ -71,7 +71,7 @@ export function App() {
       const response = await fetch('/api/review', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ quoteId: result.quote.id, sessionId: getPublicSessionId(), analyticsScope: smokeTest ? 'smoke' : '' }),
+        body: JSON.stringify({ quoteId: result.quote.id, sessionId: getPublicSessionId(), ...publicAttribution, analyticsScope: smokeTest ? 'smoke' : '' }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? 'Preview unavailable.');

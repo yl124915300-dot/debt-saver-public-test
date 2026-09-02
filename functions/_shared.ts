@@ -1,4 +1,11 @@
-import type { PublicEvent } from '../src/services/publicTypes.js';
+import {
+  attributionCampaigns,
+  attributionMediums,
+  attributionSources,
+  landingIntents,
+  type PublicAttribution,
+  type PublicEvent,
+} from '../src/services/publicTypes.js';
 
 export interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
@@ -21,6 +28,7 @@ export interface PagesContext {
 }
 
 const allowed = new Set<PublicEvent>([
+  'LANDING_VISIT',
   'VISITOR',
   'ADDRESS_SUBMITTED',
   'DEBT_FOUND',
@@ -28,6 +36,19 @@ const allowed = new Set<PublicEvent>([
   'QUOTE_VIEWED',
   'REVIEW_REQUESTED',
 ]);
+
+function allowlisted<T extends readonly string[]>(value: unknown, allowedValues: T, fallback: T[number]): T[number] {
+  return typeof value === 'string' && (allowedValues as readonly string[]).includes(value) ? value as T[number] : fallback;
+}
+
+export function normalizeAttribution(input: Record<string, unknown> = {}): PublicAttribution {
+  return {
+    landing_intent: allowlisted(input.landing_intent, landingIntents, 'main'),
+    utm_source: allowlisted(input.utm_source ?? input.source, attributionSources, 'direct'),
+    utm_medium: allowlisted(input.utm_medium, attributionMediums, 'none'),
+    utm_campaign: allowlisted(input.utm_campaign, attributionCampaigns, 'none'),
+  };
+}
 
 export async function parseBody(request: Request) {
   const contentLength = Number(request.headers.get('content-length') ?? 0);
@@ -62,13 +83,13 @@ export async function recordEvent(
   event: PublicEvent,
   scope: 'live' | 'demo' | 'smoke',
   sessionId: string,
-  source = 'direct',
+  attributionInput: Record<string, unknown> = {},
 ) {
   if (!allowed.has(event)) throw new Error('Unsupported funnel event.');
   if (!/^[0-9a-f-]{16,64}$/i.test(sessionId)) throw new Error('Invalid anonymous session.');
   if (!env.DB) return false;
   const sessionHash = await hashSession(sessionId);
-  const normalizedSource = /^[a-z0-9_-]{1,64}$/.test(source) ? source : 'direct';
+  const attribution = normalizeAttribution(attributionInput);
   const day = new Date().toISOString().slice(0, 10);
   await env.DB.prepare(
     'INSERT OR IGNORE INTO funnel_events (event, scope, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?)',
@@ -78,15 +99,28 @@ export async function recordEvent(
       event TEXT NOT NULL,
       scope TEXT NOT NULL,
       source TEXT NOT NULL,
+      landing_intent TEXT NOT NULL DEFAULT 'main',
+      medium TEXT NOT NULL DEFAULT 'none',
+      campaign TEXT NOT NULL DEFAULT 'none',
       day TEXT NOT NULL,
       session_hash TEXT NOT NULL,
       created_at TEXT NOT NULL,
-      UNIQUE(scope, event, source, session_hash)
+      UNIQUE(scope, event, session_hash)
     )`,
   ).run();
   await env.DB.prepare(
-    'INSERT OR IGNORE INTO funnel_attribution (event, scope, source, day, session_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-  ).bind(event, scope, normalizedSource, day, sessionHash, new Date().toISOString()).run();
+    `INSERT INTO funnel_attribution
+      (event, scope, source, landing_intent, medium, campaign, day, session_hash, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(scope, event, session_hash) DO UPDATE SET
+        source = excluded.source,
+        landing_intent = excluded.landing_intent,
+        medium = excluded.medium,
+        campaign = excluded.campaign`,
+  ).bind(
+    event, scope, attribution.utm_source, attribution.landing_intent, attribution.utm_medium,
+    attribution.utm_campaign, day, sessionHash, new Date().toISOString(),
+  ).run();
   return true;
 }
 
