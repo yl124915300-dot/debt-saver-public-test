@@ -7,6 +7,8 @@ export type LedgerState =
   | 'QUOTE_VIEWED'
   | 'SIMULATION_PASS'
   | 'REVIEW_REQUESTED'
+  | 'EXECUTION_INTENT'
+  | 'FRESH_PREFLIGHT'
   | 'TX_SIGNED'
   | 'TX_CONFIRMED'
   | 'FEE_RECEIVED';

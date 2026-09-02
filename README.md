@@ -12,6 +12,8 @@ Intent entry points:
 
 Intent classification, channel rules, and reply gates are documented in `docs/INTENT_MONITOR.md`.
 
+The read-only Debt Saver Revenue Agent lives in `revenue-agent/SKILL.md`. Its typed `evaluateRevenueOpportunity(input)` interface consumes observed funnel evidence and quote economics, then returns one evidence-backed next action. It cannot write funnel stages, send follow-ups, authorize or control wallets, request secrets or signatures, create broadcastable transactions, or promise returns.
+
 Debt Saver is a deliberately narrow public test for Ethereum Morpho Blue borrowers. It compares a live Morpho Blue position with Aave V3 Ethereum and returns a five-minute, read-only preflight only when every source, feasibility, safety, and economics gate passes.
 
 ## Safety boundary
