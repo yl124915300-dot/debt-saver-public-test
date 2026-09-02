@@ -29,6 +29,7 @@ describe('intent landing pages', () => {
     const script = await readFile(new URL('../public/intent-attribution.js', import.meta.url), 'utf8');
     expect(script).toContain("event: 'LANDING_VISIT'");
     expect(script).toContain("scope: smoke ? 'smoke' : 'live'");
+    expect(script).toContain("'realtime_rate_snapshot', 'intent_monitor', 'savings_outcome_v1'");
     for (const field of ['landing_intent', 'utm_source', 'utm_medium', 'utm_campaign']) expect(script).toContain(field);
     expect(script).not.toMatch(/document\.cookie|referrer|wallet|location\.href\s*[,}]/);
   });

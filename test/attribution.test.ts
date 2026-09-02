@@ -25,12 +25,12 @@ class CapturingDatabase implements D1Database {
 
 describe('privacy-friendly campaign attribution', () => {
   it('retains an allowlisted X campaign and landing intent', () => {
-    const result = parsePublicAttribution('?landing_intent=intent_aave_borrow_rate&utm_source=x&utm_medium=organic&utm_campaign=realtime_rate_snapshot');
+    const result = parsePublicAttribution('?landing_intent=intent_aave_borrow_rate&utm_source=x&utm_medium=organic&utm_campaign=savings_outcome_v1');
     expect(result).toEqual({
       landing_intent: 'intent_aave_borrow_rate',
       utm_source: 'x',
       utm_medium: 'organic',
-      utm_campaign: 'realtime_rate_snapshot',
+      utm_campaign: 'savings_outcome_v1',
     });
   });
 
@@ -45,10 +45,13 @@ describe('privacy-friendly campaign attribution', () => {
     expect(parsePublicAttribution(`?landing_intent=notes&utm_source=${tooLong}&utm_medium=email&utm_campaign=my_secret_campaign`)).toEqual({
       landing_intent: 'main', utm_source: 'direct', utm_medium: 'none', utm_campaign: 'none',
     });
+    expect(parsePublicAttribution(`?utm_campaign=${tooLong}`)).toEqual({
+      landing_intent: 'main', utm_source: 'direct', utm_medium: 'none', utm_campaign: 'none',
+    });
     expect(normalizeAttribution({
-      landing_intent: 'intent_morpho_vs_aave', utm_source: 'x', utm_medium: 'organic', utm_campaign: 'realtime_rate_snapshot',
+      landing_intent: 'intent_morpho_vs_aave', utm_source: 'x', utm_medium: 'organic', utm_campaign: 'savings_outcome_v1',
     })).toEqual({
-      landing_intent: 'intent_morpho_vs_aave', utm_source: 'x', utm_medium: 'organic', utm_campaign: 'realtime_rate_snapshot',
+      landing_intent: 'intent_morpho_vs_aave', utm_source: 'x', utm_medium: 'organic', utm_campaign: 'savings_outcome_v1',
     });
   });
 

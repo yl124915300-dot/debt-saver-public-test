@@ -3,7 +3,7 @@
     landing_intent: ['intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk'],
     utm_source: ['x', 'intent_aave_borrow_rate', 'intent_morpho_vs_aave', 'intent_liquidation_risk'],
     utm_medium: ['organic', 'landing'],
-    utm_campaign: ['realtime_rate_snapshot', 'intent_monitor'],
+    utm_campaign: ['realtime_rate_snapshot', 'intent_monitor', 'savings_outcome_v1'],
   };
   const landingIntent = document.body.dataset.landingIntent;
   if (!allowed.landing_intent.includes(landingIntent || '')) return;
